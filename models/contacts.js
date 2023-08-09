@@ -1,14 +1,53 @@
-// const fs = require('fs/promises')
+const fs = require("node:fs/promises");
+const path = require("node:path");
 
-const listContacts = async () => {}
+const contactPath = path.join(__dirname, "./contacts.json");
 
-const getContactById = async (contactId) => {}
+const listContacts = async () => {
+  const contactData = JSON.parse(await fs.readFile(contactPath));
+  return contactData;
+};
 
-const removeContact = async (contactId) => {}
+const getContactById = async (id) => {
+  const contactData = JSON.parse(await fs.readFile(contactPath));
+  const contact = contactData.find((contact) => String(contact.id) === id);
+  if (!contact) {
+    throw new Error("Contact not found");
+  }
+  return contact;
+};
 
-const addContact = async (body) => {}
+const removeContact = async (id) => {
+  const contactData = JSON.parse(await fs.readFile(contactPath));
+  const updatedContact = contactData.filter(
+    (contact) => String(contact.id) !== id
+  );
+  if (updatedContact.length === contactData.length) {
+    throw new Error("Contact not found");
+  }
+  await fs.writeFile(contactPath, JSON.stringify(updatedContact));
+  return updatedContact;
+};
 
-const updateContact = async (contactId, body) => {}
+const addContact = async (body) => {
+  const contactData = JSON.parse(await fs.readFile(contactPath));
+  contactData.push(body);
+  await fs.writeFile(contactPath, JSON.stringify(contactData));
+  return contactData;
+};
+
+const updateContact = async (id, body) => {
+  const contactData = JSON.parse(await fs.readFile(contactPath));
+  const contactIndex = contactData.findIndex(
+    (contact) => String(contact.id) === id
+  );
+  if (contactIndex !== -1) {
+    contactData[contactIndex] = { ...contactData[contactIndex], ...body };
+    await fs.writeFile(contactPath, JSON.stringify(contactData));
+    return contactData[contactIndex];
+  }
+  throw new Error("Contact not found");
+};
 
 module.exports = {
   listContacts,
@@ -16,4 +55,4 @@ module.exports = {
   removeContact,
   addContact,
   updateContact,
-}
+};
