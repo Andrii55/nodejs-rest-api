@@ -1,58 +1,77 @@
-const fs = require("node:fs/promises");
-const path = require("node:path");
+const { Contact } = require("./contact_module");
 
-const contactPath = path.join(__dirname, "./contacts.json");
-
-const listContacts = async () => {
-  const contactData = JSON.parse(await fs.readFile(contactPath));
-  return contactData;
+const listContacts = async (req, res, next) => {
+  try {
+    const contactData = await Contact.find();
+    res.status(200).json(contactData);
+  } catch (e) {
+    next(e);
+  }
 };
 
-const getContactById = async (id) => {
-  const contactData = JSON.parse(await fs.readFile(contactPath));
-  const contact = contactData.find((contact) => String(contact.id) === id);
-  if (!contact) {
+const getContactById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const contact = await Contact.findById(id);
+    if (contact) {
+      return res.status(200).json(contact);
+    }
     throw new Error("Contact not found");
+  } catch (e) {
+    next(e);
   }
-  return contact;
 };
 
-const removeContact = async (id) => {
-  const contactData = JSON.parse(await fs.readFile(contactPath));
-  const updatedContact = contactData.filter(
-    (contact) => String(contact.id) !== id
-  );
-  if (updatedContact.length === contactData.length) {
+const addContact = async (req, res, next) => {
+  try {
+    const { body } = req;
+    const contacts = await Contact.create(body);
+    if (body.name && body.email && body.phone) {
+      return res.status(201).json(contacts);
+    }
+    throw new Error("Name, email, and phone are required");
+  } catch (e) {
+    next(e);
+  }
+};
+
+const removeContact = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const contact = await Contact.findOneAndDelete({ _id: id });
+
+    if (contact) {
+      return res.status(204).json();
+    }
     throw new Error("Contact not found");
+  } catch (e) {
+    next(e);
   }
-  await fs.writeFile(contactPath, JSON.stringify(updatedContact));
-  return updatedContact;
 };
 
-const addContact = async (body) => {
-  const contactData = JSON.parse(await fs.readFile(contactPath));
-  contactData.push(body);
-  await fs.writeFile(contactPath, JSON.stringify(contactData));
-  return contactData;
-};
-
-const updateContact = async (id, body) => {
-  const contactData = JSON.parse(await fs.readFile(contactPath));
-  const contactIndex = contactData.findIndex(
-    (contact) => String(contact.id) === id
-  );
-  if (contactIndex !== -1) {
-    contactData[contactIndex] = { ...contactData[contactIndex], ...body };
-    await fs.writeFile(contactPath, JSON.stringify(contactData));
-    return contactData[contactIndex];
+const updateStatusContact = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { favorite } = req.body;
+    const updatedContact = await Contact.findOneAndUpdate(
+      { _id: id },
+      { favorite },
+      { new: true }
+    );
+    if (updatedContact) {
+      return res.status(200).json(updatedContact);
+    }
+    throw new Error("Contact not found");
+  } catch (e) {
+    next(e);
   }
-  throw new Error("Contact not found");
 };
 
 module.exports = {
   listContacts,
   getContactById,
-  removeContact,
   addContact,
-  updateContact,
+  removeContact,
+  updateStatusContact,
 };
