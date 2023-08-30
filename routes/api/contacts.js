@@ -4,7 +4,7 @@ const { contactsController } = require("../../controller");
 
 const router = express.Router();
 
-const { chekJwtToken } = require("../../middlewares/jwt_token.middlewarse");
+const { chekJwtToken } = require("../../middlewares");
 
 router.get("/", chekJwtToken, contactsController.listContacts);
 router.get("/:id", chekJwtToken, contactsController.getContactById);

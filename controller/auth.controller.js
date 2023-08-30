@@ -1,18 +1,9 @@
-const Joi = require("joi");
 const { User } = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { validateUser } = require("../middlewares");
 
 const { JWT_SICRET_KEY } = process.env;
-
-function validateUser(user) {
-  const schema = Joi.object({
-    email: Joi.string().email().required(),
-    password: Joi.string().required(),
-  });
-
-  return schema.validate(user);
-}
 
 const signup = async (req, res, next) => {
   try {
