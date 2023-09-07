@@ -1,6 +1,7 @@
 const { User } = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const gravatar = require("gravatar");
 const { validateUser } = require("../middlewares");
 
 const { JWT_SICRET_KEY } = process.env;
@@ -14,14 +15,23 @@ const signup = async (req, res, next) => {
 
     const { email, password } = req.body;
 
+    const avatarURL = gravatar.url(email, {
+      s: "200",
+      r: "pg",
+      d: "mm",
+    });
+
     const salt = await bcrypt.genSalt();
 
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const result = await User.create({
+    const newUser = await User.create({
       email,
+      avatarURL,
       password: hashedPassword,
     });
+
+    const result = await newUser.save();
 
     return res.status(201).json({ id: result._id, email });
   } catch (e) {

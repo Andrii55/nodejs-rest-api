@@ -1,8 +1,8 @@
 const express = require("express");
 
-const { contactsController } = require("../../controller");
-
 const router = express.Router();
+
+const { contactsController } = require("../../controller");
 
 const { chekJwtToken } = require("../../middlewares");
 

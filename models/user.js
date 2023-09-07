@@ -17,6 +17,8 @@ const usersSchema = new Schema(
       default: "starter",
     },
 
+    avatarURL: String,
+
     token: String,
   },
   { timestamps: true, versionKey: "revision" }
