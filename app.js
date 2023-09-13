@@ -1,13 +1,44 @@
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
-const fs = require("fs/promises");
+const nodemailer = require("nodemailer");
+
 require("dotenv").config();
 
-const multer = require("multer");
-const path = require("path");
+// const { IMAIL_USER, IMAIL_PASS } = process.env;
 
-const { contactsRouter, authRouter, imagesRouter } = require("./routes/api");
+const {
+  contactsRouter,
+  authRouter,
+  imagesRouter,
+  verifyRouter,
+} = require("./routes/api");
+
+// async function main() {
+//   try {
+//     const transport = nodemailer.createTransport({
+//       host: "sandbox.smtp.mailtrap.io",
+//       port: 2525,
+//       auth: {
+//         user: IMAIL_USER,
+//         pass: IMAIL_PASS,
+//       },
+//     });
+//     const email = {
+//       from: "ahomzyk@meta.ua",
+//       to: "noresponse@gmail.com",
+//       subject: "Nodemailer test",
+//       text: "Привіт. Ми тестуємо надсилання листів!",
+//     };
+
+//     const response = await transport.sendMail(email);
+//     console.log("response: ", response);
+//   } catch (e) {
+//     console.error("Aplication error:", e);
+//   }
+// }
+
+// main();
 
 const app = express();
 
@@ -21,6 +52,7 @@ app.use(express.static("public"));
 app.use("/api/contacts", contactsRouter);
 app.use("/api/", authRouter);
 app.use("/api/", imagesRouter);
+app.use("/api/", verifyRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Not found" });
